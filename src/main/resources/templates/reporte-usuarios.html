@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 8px;
+        }
+        th {
+            background-color: #ddd;
+            text-align: left;
+        }
+        h2 {
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+<h2 style="text-align: center;">Reporte de Usuarios</h2>
+
+<#if desde?? || hasta??>
+<p>
+    <strong>Filtros:</strong>
+    <#if desde??> Desde: ${desde}</#if>
+    <#if hasta??> - Hasta: ${hasta}</#if>
+</p>
+</#if>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Usuario</th>
+        <th>Correo</th>
+        <th>Teléfono</th>
+
+        <!-- NUEVAS COLUMNAS -->
+        <th>Tipo Doc</th>
+        <th>Número Doc</th>
+
+        <th>Rol</th>
+        <th>Fecha Registro</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <#list usuarios as u>
+        <tr>
+            <td>${u.id}</td>
+            <td>${u.userName}</td>
+            <td>${u.correoUsuario}</td>
+            <td>${u.telefonoUsuario}</td>
+
+            <!-- DATOS NUEVOS -->
+            <td>${u.tipoDocumento}</td>
+            <td>${u.numeroDocumento}</td>
+
+            <td>${u.rol}</td>
+            <td>${u.createAt}</td>
+        </tr>
+    </#list>
+    </tbody>
+</table>
+
+</body>
+</html>

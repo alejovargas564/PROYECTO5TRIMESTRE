@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Fundación - SAPIB</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #14B8A6;
+        }
+
+        .bg-sapib {
+            background: linear-gradient(
+                to bottom right,
+                rgba(79, 70, 229, 0.85),
+                rgba(20, 184, 166, 0.85)
+            ),
+            url('https://i.pinimg.com/736x/ea/29/a4/ea29a44d8bc999da54fcb789f39bc079.jpg')
+            no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body class="bg-sapib min-h-screen">
+
+<!-- NAVBAR FUNDACIÓN -->
+<nav class="bg-white/90 shadow-md backdrop-blur-md border-b border-gray-200 fixed top-0 left-0 w-full z-20">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+        <!-- LOGO + NOMBRE -->
+        <div class="flex items-center space-x-3">
+            <span class="text-2xl font-bold text-primary">SAPIB</span>
+            <span class="text-gray-600" th:text="${#authentication.name}"></span>
+        </div>
+
+        <!-- MENÚ -->
+        <ul class="flex space-x-6 font-medium text-gray-700">
+            <li><a href="/fundacion/dashboard" class="text-primary font-semibold hover:text-primary">Inicio</a></li>
+            <li><a href="/fundacion/eventos" class="hover:text-primary">Eventos</a></li>
+            <li><a href="/fundacion/necesidades" class="hover:text-primary">Publicar necesidades</a></li>
+            <li><a href="/fundacion/voluntarios" class="hover:text-primary">Voluntarios</a></li>
+            <li><a href="/fundacion/reportes" class="hover:text-primary">Reportes</a></li>
+            <li><a href="/fundacion/perfil" class="hover:text-primary">Perfil</a></li>
+        </ul>
+
+        <!-- LOGOUT -->
+        <a href="/logout"
+           class="bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 transition">
+            Cerrar sesión
+        </a>
+    </div>
+</nav>
+
+<!-- CONTENIDO -->
+<div class="max-w-4xl mx-auto pt-32 pb-16 px-6 animate-[fadeIn_.6s_ease-out]">
+
+    <h1 class="text-4xl font-bold text-white text-center mb-10">
+        Panel de Fundación
+    </h1>
+
+    <!-- TARJETA PRINCIPAL -->
+    <div class="bg-white/95 rounded-xl shadow-xl border border-gray-200 p-8">
+
+        <h3 class="text-2xl font-bold text-gray-800">
+            Bienvenida/o,
+            <span class="text-primary" th:text="${#authentication.name}"></span>
+        </h3>
+
+        <p class="mt-2 text-gray-700">
+            <strong>Rol:</strong> Fundación
+        </p>
+
+        <p class="mt-4 text-gray-800 font-semibold">Acciones disponibles:</p>
+
+        <ul class="list-disc ml-6 mt-2 text-gray-700 space-y-1">
+            <li>Gestionar eventos</li>
+            <li>Publicar necesidades</li>
+            <li>Ver voluntarios disponibles</li>
+            <li>Generar reportes</li>
+        </ul>
+
+        <!-- BOTONES DE ACCIÓN -->
+        <div class="mt-6 flex flex-wrap gap-4">
+
+            <a href="/fundacion/eventos"
+               class="bg-primary text-white px-5 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition shadow">
+                📅 Gestionar eventos
+            </a>
+
+            <a href="/fundacion/necesidades"
+               class="bg-secondary text-white px-5 py-3 rounded-lg font-semibold hover:bg-teal-600 transition shadow">
+                📢 Publicar necesidades
+            </a>
+
+            <a href="/fundacion/voluntarios"
+               class="bg-blue-500 text-white px-5 py-3 rounded-lg font-semibold hover:bg-blue-600 transition shadow">
+                🧑‍🤝‍🧑 Ver voluntarios
+            </a>
+
+            <a href="/fundacion/reportes"
+               class="bg-yellow-500 text-white px-5 py-3 rounded-lg font-semibold hover:bg-yellow-600 transition shadow">
+                📊 Reportes
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

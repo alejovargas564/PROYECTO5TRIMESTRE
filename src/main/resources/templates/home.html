@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio - SAPIB</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #14B8A6;
+            --warm: #FFB703;
+        }
+
+        .bg-sapib {
+            background: linear-gradient(
+                to bottom right,
+                rgba(79, 70, 229, 0.88),
+                rgba(20, 184, 166, 0.88)
+            );
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body class="bg-sapib min-h-screen text-gray-800">
+
+<!-- NAVBAR -->
+<nav class="bg-white/95 shadow-md backdrop-blur-md border-b fixed top-0 left-0 w-full z-20">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+        <div class="flex items-center space-x-3">
+            <span class="text-3xl font-bold text-[var(--primary)]">SAPIB</span>
+            <span class="text-gray-500 text-lg">| <span th:text="${userName}"></span></span>
+       
+
+        <div>
+            <form th:action="@{/logout}" method="post">
+                <button class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow">
+                    🔓 Cerrar sesión
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- CONTENIDO -->
+<section class="pt-32 pb-16 px-6">
+    <div class="max-w-3xl mx-auto animate-[fadeIn_.6s_ease-out]">
+
+        <h2 class="text-4xl font-bold text-white mb-4">
+            Bienvenido, <span th:text="${userName}"></span>
+        </h2>
+
+        <!-- Rol Badge -->
+        <div class="mb-6">
+            <span th:if="${rol == 'ADMIN'}"
+                  class="px-4 py-1 bg-red-500 text-white font-bold rounded-full">
+                ADMINISTRADOR
+            </span>
+
+            <span th:if="${rol == 'FUNDACION'}"
+                  class="px-4 py-1 bg-blue-500 text-white font-bold rounded-full">
+                FUNDACIÓN
+            </span>
+
+            <span th:if="${rol == 'VOLUNTARIO'}"
+                  class="px-4 py-1 bg-green-500 text-white font-bold rounded-full">
+                VOLUNTARIO
+            </span>
+        </div>
+
+        <!-- TARJETA -->
+        <div class="bg-white/95 rounded-xl shadow-xl border p-8">
+
+            <!-- ADMIN -->
+            <div th:if="${rol == 'ADMIN'}">
+                <h3 class="text-2xl font-bold text-[var(--primary)] mb-2">
+                    👨‍💼 Panel de Administrador
+                </h3>
+                <p class="text-gray-700 mb-6">Gestiona usuarios y controla toda la plataforma SAPIB.</p>
+
+                <div class="space-y-3">
+                    <a th:href="@{/usuarios}"
+                       class="block px-4 py-3 bg-[var(--primary)] text-white rounded-lg hover:bg-indigo-700 shadow">
+                        📋 Ver y Gestionar Usuarios
+                    </a>
+
+                    <a th:href="@{/usuarios/nuevo}"
+                       class="block px-4 py-3 bg-[var(--secondary)] text-white rounded-lg hover:bg-teal-600 shadow">
+                        ➕ Crear Nuevo Usuario
+                    </a>
+                </div>
+            </div>
+
+            <!-- FUNDACIÓN -->
+            <div th:if="${rol == 'FUNDACION'}">
+                <h3 class="text-2xl font-bold text-[var(--primary)] mb-2">🏛️ Panel de Fundación</h3>
+                <p class="text-gray-700 mb-6">Gestiona eventos y voluntarios de tu organización.</p>
+
+                <a th:href="@{/fundacion/dashboard}"
+                   class="block px-4 py-3 bg-[var(--secondary)] text-white rounded-lg hover:bg-teal-600 shadow">
+                    📊 Ir al Dashboard de Fundación
+                </a>
+            </div>
+
+            <!-- VOLUNTARIO -->
+            <div th:if="${rol == 'VOLUNTARIO'}">
+                <h3 class="text-2xl font-bold text-[var(--primary)] mb-2">🤝 Panel de Voluntario</h3>
+                <p class="text-gray-700 mb-6">Encuentra oportunidades para ayudar donde más se necesita.</p>
+
+                <a th:href="@{/voluntario/dashboard}"
+                   class="block px-4 py-3 bg-[var(--secondary)] text-white rounded-lg hover:bg-teal-600 shadow">
+                    📊 Ir al Dashboard de Voluntario
+                </a>
+            </div>
+
+            <!-- MENSAJE EXITO -->
+            <p id="mensajeExito"
+               th:if="${param.actualizado}"
+               class="text-green-600 font-semibold mt-4">
+                ¡Tu perfil ha sido actualizado correctamente!
+            </p>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- SCRIPT OCULTAR ALERTA -->
+<script>
+    setTimeout(() => {
+        const m = document.getElementById("mensajeExito");
+        if (m) m.style.display = "none";
+    }, 4000);
+</script>
+
+</body>
+</html>
