@@ -2,94 +2,116 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Inicio - SAPIB</title>
+    <title>Dashboard Admin - SAPIB</title>
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
         :root {
-            --primary: #4F46E5;
-            --secondary: #14B8A6;
-            --warm: #FFB703;
-        }
-
-        .bg-sapib {
-            background: linear-gradient(
-                to bottom right,
-                rgba(79, 70, 229, 0.88),
-                rgba(20, 184, 166, 0.88)
-            );
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            --primary: #4F46E5; /* Índigo */
+            --secondary: #14B8A6; /* Teal */
+            --warm: #FFB703; /* Amarillo */
         }
     </style>
 </head>
 
-<body class="bg-sapib min-h-screen text-gray-800">
+<body class="bg-gray-100 min-h-screen text-gray-800">
 
-<!-- NAVBAR -->
 <nav class="bg-white/95 shadow-md backdrop-blur-md border-b fixed top-0 left-0 w-full z-20">
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
         <div class="flex items-center space-x-3">
-            <span class="text-3xl font-bold text-[var(--primary)]">SAPIB</span>
-           <span th:text="${#authentication.name}"></span>
+             <img src="/img/sapib.jpg"
+                 alt="Logo SAPIB"
+                 class="h-14 w-auto rounded-lg shadow-md">
+            <span class="text-2xl font-bold text-[var(--primary)]">SAPIB</span>
+            <span class="text-gray-600 font-medium">Administrador: <span th:text="${#authentication.name}"></span></span>
         </div>
 
-        <div>
-            <form th:action="@{/logout}" method="post">
-                <button class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow">
-                    🔓 Cerrar sesión
-                </button>
-            </form>
-        </div>
+        <ul class="flex space-x-6 font-medium text-gray-700">
+             <li><a href="/admin-home" class="text-[var(--primary)] font-semibold">Inicio</a></li>
+             <li><a href="/perfil" class="hover:text-[var(--primary)]">Perfil</a></li>
+        </ul>
+
+        <form th:action="@{/logout}" method="post">
+            <button class="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 shadow transition">
+                <i class="bi bi-box-arrow-right mr-1"></i> Cerrar sesión
+            </button>
+        </form>
     </div>
 </nav>
 
-<!-- CONTENIDO -->
-<section class="pt-32 pb-16 px-6">
-    <div class="max-w-3xl mx-auto animate-[fadeIn_.6s_ease-out]">
+<section class="max-w-7xl mx-auto pt-24 pb-16 px-6">
+    
+    <header class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-[var(--primary)] mb-10">
+        <h1 class="text-4xl font-extrabold text-gray-900 flex items-center">
+            <i class="bi bi-shield-lock-fill text-[var(--primary)] mr-3"></i> 
+            Panel de Administración
+        </h1>
+        <p class="mt-2 text-lg text-gray-600">
+            Control central para la gestión de usuarios, visitas y solicitudes de necesidad.
+        </p>
+    </header>
 
-        
-
-        <!-- TARJETA PRINCIPAL -->
-        <div class="bg-white/95 rounded-xl shadow-xl border p-8">
-
-            <h3 class="text-2xl font-bold text-[var(--primary)] mb-2">
-                👨‍💼 Panel de Administrador
-            </h3>
-
-            <p class="text-gray-700 mb-6">
-                Desde aquí puedes gestionar todos los usuarios del sistema.
-            </p>
-
-            <!-- BOTÓN GESTIONAR USUARIOS -->
-            <a th:href="@{/usuarios}"
-               class="block px-6 py-3 bg-[var(--primary)] text-white rounded-lg hover:bg-indigo-700 shadow text-center text-lg font-semibold">
-                📋 Gestionar Usuarios
-            </a>
-
-            <!-- MENSAJE EXITO -->
-            <p id="mensajeExito"
-               th:if="${param.actualizado}"
-               class="text-green-600 font-semibold mt-4">
-                ¡Tu perfil ha sido actualizado correctamente!
-            </p>
-
-        </div>
-
+    <div id="mensajeExito"
+        th:if="${param.actualizado}"
+        class="bg-green-100 border border-green-300 text-green-700 p-3 rounded-lg font-medium flex items-center mb-6">
+        <i class="bi bi-check-circle-fill mr-3 text-xl"></i>
+        <span>¡Tu perfil ha sido actualizado correctamente!</span>
     </div>
+
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <a th:href="@{/usuarios}"
+           class="bg-white p-6 rounded-xl shadow-xl border-b-4 border-[var(--primary)] transition hover:shadow-2xl hover:-translate-y-1 block">
+            <div class="flex items-center space-x-4">
+                <i class="bi bi-people-fill text-4xl text-[var(--primary)]"></i>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Gestionar Usuarios</h3>
+                    <p class="text-sm text-gray-500">Administra todos los voluntarios y fundaciones.</p>
+                </div>
+            </div>
+        </a>
+
+        <a th:href="@{/admin/visitas}"
+           class="bg-white p-6 rounded-xl shadow-xl border-b-4 border-[var(--secondary)] transition hover:shadow-2xl hover:-translate-y-1 block">
+            <div class="flex items-center space-x-4">
+                <i class="bi bi-calendar-check-fill text-4xl text-[var(--secondary)]"></i>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Revisar Visitas</h3>
+                    <p class="text-sm text-gray-500">Visualiza todas las visitas agendadas en el sistema.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="/admin/necesidades"
+           class="bg-white p-6 rounded-xl shadow-xl border-b-4 border-[var(--warm)] transition hover:shadow-2xl hover:-translate-y-1 block">
+            <div class="flex items-center space-x-4">
+                <i class="bi bi-box-seam-fill text-4xl text-[var(--warm)]"></i>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Ver Necesidades</h3>
+                    <p class="text-sm text-gray-500">Monitorea todas las solicitudes de apoyo de las fundaciones.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
 </section>
 
-<!-- SCRIPT OCULTAR ALERTA -->
 <script>
+    // Script para ocultar el mensaje de éxito después de 4 segundos
     setTimeout(() => {
         const m = document.getElementById("mensajeExito");
-        if (m) m.style.display = "none";
+        if (m) {
+            m.style.transition = 'opacity 1s ease-out';
+            m.style.opacity = '0';
+            // Ocultar completamente después de la transición
+            setTimeout(() => {
+                m.style.display = "none";
+            }, 1000); 
+        }
     }, 4000);
 </script>
 

@@ -4,19 +4,36 @@
     <meta charset="UTF-8">
     <title>Mi Perfil</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #4F46E5; /* Índigo */
+            --secondary: #14B8A6; /* Teal */
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-start justify-center pt-20">
+<body class="bg-gray-100 min-h-screen flex items-start justify-center pt-16">
 
-<div class="max-w-lg mx-auto bg-white p-8 shadow-lg rounded-xl">
+<div class="max-w-xl mx-auto bg-white p-8 shadow-2xl rounded-xl border-t-4 border-[var(--primary)] w-full">
 
-    <h2 class="text-2xl font-bold text-center text-indigo-600 mb-6">Mi Perfil</h2>
+    <h2 class="text-3xl font-extrabold text-center text-[var(--primary)] mb-6 flex items-center justify-center">
+        <i class="bi bi-person-circle text-4xl mr-3"></i> Mi Perfil
+    </h2>
 
-    <form th:action="@{/perfil/guardar}" th:object="${usuario}" method="post" class="space-y-4">
+    <div th:if="${param.perfilActualizado}" class="mt-4 text-center bg-green-100 border border-green-300 text-green-700 p-3 rounded-lg font-medium flex items-center justify-center mb-6">
+        <i class="bi bi-check-circle-fill mr-2"></i>
+        <span>Perfil actualizado correctamente.</span>
+    </div>
 
-        <!-- ID (OBLIGATORIO) -->
+    <div th:if="${error}" class="mt-4 text-center bg-red-100 border border-red-300 text-red-700 p-3 rounded-lg font-medium flex items-center justify-center mb-6">
+        <i class="bi bi-x-octagon-fill mr-2"></i>
+        <span th:text="${error}"></span>
+    </div>
+
+    <form th:action="@{/perfil/guardar}" th:object="${usuario}" method="post" class="space-y-5">
+
         <input type="hidden" th:field="*{id}"/>
 
-        <!-- CAMPOS NO EDITABLES PERO NECESARIOS -->
         <input type="hidden" th:field="*{userName}"/>
         <input type="hidden" th:field="*{correoUsuario}"/>
         <input type="hidden" th:field="*{tipoDocumento}"/>
@@ -25,53 +42,54 @@
         <input type="hidden" th:field="*{estadoUsuario}"/>
         <input type="hidden" th:field="*{createAt}"/>
 
-        <!-- Usuario (solo lectura) -->
-        <div>
-            <label class="font-medium text-gray-700">Usuario:</label>
-            <input type="text" th:value="${usuario.userName}"
-                   class="w-full px-3 py-2 rounded-lg bg-gray-200" readonly>
-        </div>
+        <div class="bg-indigo-50/70 p-4 rounded-lg border border-indigo-100">
+            <p class="font-bold text-sm text-indigo-700 mb-3 flex items-center">
+                 <i class="bi bi-lock-fill mr-2"></i> Información de Cuenta (Solo Lectura)
+            </p>
 
-        <!-- Correo (solo lectura) -->
-        <div>
-            <label class="font-medium text-gray-700">Correo:</label>
-            <input type="email" th:value="${usuario.correoUsuario}"
-                   class="w-full px-3 py-2 rounded-lg bg-gray-200" readonly>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="font-medium text-gray-700 block text-sm">Usuario:</label>
+                    <p class="w-full px-3 py-2 rounded-lg bg-gray-200 text-sm font-semibold" th:text="${usuario.userName}"></p>
+                </div>
+                <div>
+                    <label class="font-medium text-gray-700 block text-sm">Rol:</label>
+                    <p class="w-full px-3 py-2 rounded-lg bg-gray-200 text-sm font-semibold" th:text="${usuario.rol}"></p>
+                </div>
+                <div class="col-span-2">
+                    <label class="font-medium text-gray-700 block text-sm">Correo:</label>
+                    <p class="w-full px-3 py-2 rounded-lg bg-gray-200 text-sm font-semibold" th:text="${usuario.correoUsuario}"></p>
+                </div>
+            </div>
         </div>
+        
+        <h3 class="font-bold text-lg text-gray-700 border-b pb-2">Datos Editables</h3>
 
-        <!-- Teléfono editable -->
         <div>
-            <label class="font-medium text-gray-700">Teléfono:</label>
+            <label class="font-medium text-gray-700 flex items-center mb-1">
+                 <i class="bi bi-phone-fill mr-2 text-[var(--secondary)]"></i> Teléfono:
+            </label>
             <input type="text" th:field="*{telefonoUsuario}"
-                   class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500"
+                   class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--primary)] transition"
                    required>
         </div>
 
-        <!-- Nueva contraseña -->
         <div>
-            <label class="font-medium text-gray-700">Nueva contraseña:</label>
+            <label class="font-medium text-gray-700 flex items-center mb-1">
+                 <i class="bi bi-key-fill mr-2 text-red-500"></i> Nueva contraseña:
+            </label>
             <input type="password" th:field="*{password}"
-                   class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500"
+                   class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--primary)] transition"
                    placeholder="Déjalo vacío para mantener la actual">
-            <small class="text-gray-500">Déjalo vacío si no deseas cambiarla.</small>
+            <small class="text-gray-500 mt-1 block">Déjalo vacío si no deseas cambiarla.</small>
         </div>
 
-        <!-- Botón -->
         <button type="submit"
-                class="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">
-            Guardar cambios
+                class="w-full bg-[var(--primary)] text-white py-3 mt-4 rounded-lg font-semibold hover:bg-indigo-700 transition shadow-lg transform hover:scale-[1.01]">
+            <i class="bi bi-save-fill mr-2"></i> Guardar cambios
         </button>
 
     </form>
-
-    <div th:if="${param.perfilActualizado}" class="mt-4 text-center text-green-600 font-medium">
-        ✓ Perfil actualizado correctamente
-    </div>
-
-    <div th:if="${error}" class="mt-4 text-center text-red-600 font-medium">
-        <span th:text="${error}"></span>
-    </div>
-
 </div>
 
 </body>

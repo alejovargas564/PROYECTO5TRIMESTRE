@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Necesidades de ' + ${fundacion.userName}"></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root { --primary: #4F46E5; --secondary: #14B8A6; }
+        
+        .bg-gradient-header {
+            /* Un sutil degradado para hacer el encabezado más visual */
+            background-image: linear-gradient(to right, #ffffff, rgba(20, 184, 166, 0.05));
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    
+<nav class="bg-white/90 shadow-md backdrop-blur-md border-b fixed top-0 left-0 w-full z-20">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+             <img src="/img/sapib.jpg"
+                 alt="Logo SAPIB"
+                 class="h-14 w-auto rounded-lg shadow-md">
+            <span class="text-2xl font-bold text-[var(--primary)]">SAPIB</span>
+            <span th:text="${#authentication.name}"></span>
+        </div>
+        <ul class="flex space-x-6 font-medium text-gray-700">
+            <li><a href="/voluntario/fundaciones" class="hover:text-[var(--primary)]">Fundaciones</a></li>
+            <li><a href="/voluntario/historial" class="hover:text-[var(--primary)]">Mis Visitas</a></li>
+            <li><a href="/perfil" class="hover:text-[var(--primary)]">Perfil</a></li>
+        </ul>
+        <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600">Cerrar sesión</a>
+    </div>
+</nav>
+
+<section class="max-w-7xl mx-auto px-6 pt-28 pb-10">
+    
+    <div class="bg-gradient-header p-6 rounded-xl border border-gray-200 mb-8">
+        <h1 class="text-4xl font-extrabold text-[var(--primary)]">
+            Oportunidades de Voluntariado
+        </h1>
+        <p class="text-xl font-medium text-gray-700 mt-2">
+             <i class="bi bi-bank2 text-[var(--secondary)] mr-2"></i> Necesidades publicadas por <span class="text-gray-900" th:text="${fundacion.userName}"></span>
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div th:each="n : ${necesidades}"
+             class="bg-white p-6 rounded-xl shadow-xl border-t-4 border-[var(--secondary)] 
+                    hover:shadow-2xl hover:scale-[1.01] transition duration-300 transform">
+             
+            <div class="flex items-center mb-4">
+                 <i th:classappend="${n.tipoNecesidad == 'MATERIALES'} ? 'bi-box-fill' : 
+                                     (${n.tipoNecesidad == 'TALLERES'} ? 'bi-book-fill' : 
+                                     (${n.tipoNecesidad == 'FINANCIERO'} ? 'bi-cash-coin' : 'bi-patch-question-fill'))"
+                    class="bi text-xl text-indigo-500 mr-2"></i>
+                 <span class="inline-block px-3 py-1 text-xs font-bold rounded-full 
+                       text-indigo-700 bg-indigo-100"
+                       th:text="${n.tipoNecesidad}"></span>
+            </div>
+            
+            <h2 class="text-xl font-extrabold text-gray-900 mb-2" th:text="${n.titulo}"></h2>
+            
+            <p class="mt-2 text-gray-700 line-clamp-4 text-sm min-h-[80px]" th:text="${n.descripcion}"></p>
+
+            <div class="mt-6">
+                <a th:href="@{'/voluntario/agendar/' + ${fundacion.id}}"
+                   class="w-full text-center inline-block bg-[var(--secondary)] text-white px-5 py-2 rounded-lg 
+                          font-semibold hover:bg-teal-600 transition shadow-md">
+                   Agendar Visita »
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div th:if="${#lists.isEmpty(necesidades)}" class="text-center py-16 text-gray-600 bg-white shadow-lg border-2 border-dashed border-gray-300 mt-10 rounded-xl">
+        <i class="bi bi-exclamation-octagon text-5xl text-gray-400 mb-4"></i>
+        <p class="font-bold text-lg text-gray-800" th:text="'La fundación ' + ${fundacion.userName} + ' no ha publicado necesidades activas.'"></p>
+        <p class="mt-2 text-gray-500">Vuelve más tarde para ver nuevas oportunidades.</p>
+    </div>
+    
+    <div class="text-center mt-12">
+        <a th:href="@{/voluntario/fundaciones}" class="text-[var(--primary)] font-medium hover:text-indigo-600 hover:underline transition text-lg">
+            <i class="bi bi-arrow-left-circle-fill mr-1"></i> Volver a la lista de fundaciones
+        </a>
+    </div>
+
+</section>
+</body>
+</html>

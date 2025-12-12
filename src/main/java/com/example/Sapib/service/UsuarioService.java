@@ -130,6 +130,13 @@ public class UsuarioService {
     public List<Usuario> filtrarUsuarios(String nombre) {
         return filtrarUsuarios(nombre, null, null);
     }
+    
+    // ========================================================
+    // NUEVO: LISTAR FUNDACIONES PARA VOLUNTARIO
+    // ========================================================
+    public List<Usuario> listarFundaciones() {
+        return usuarioRepository.findByRol("ROLE_FUNDACION");
+    }
 
     // ========================================================
     // PERFIL - CAMPOS PERMITIDOS

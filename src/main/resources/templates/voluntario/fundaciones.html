@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Fundaciones Disponibles - SAPIB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root { --primary: #4F46E5; --secondary: #14B8A6; --soft-bg: #F5F7FA; }
+        .bg-gradient-header {
+             background: linear-gradient(
+                to bottom right,
+                rgba(79, 70, 229, 0.9),
+                rgba(20, 184, 166, 0.9)
+            );
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<nav class="bg-white/90 shadow-md backdrop-blur-md border-b fixed top-0 left-0 w-full z-20">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+             <img src="/img/sapib.jpg"
+                 alt="Logo SAPIB"
+                 class="h-14 w-auto rounded-lg shadow-md">
+            <span class="text-2xl font-bold text-[var(--primary)]">SAPIB</span>
+            <span class="text-gray-600" th:text="${#authentication.name}"></span>
+        </div>
+
+        <ul class="flex space-x-6 font-medium text-gray-700">
+            <li><a href="/voluntario/fundaciones" class="text-[var(--primary)] font-semibold">Fundaciones</a></li>
+            <li><a href="/voluntario/historial" class="hover:text-[var(--primary)]">Mis Visitas</a></li>
+            <li><a href="/perfil" class="hover:text-[var(--primary)]">Perfil</a></li>
+        </ul>
+
+        <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600">Cerrar sesión</a>
+    </div>
+</nav>
+
+<div class="max-w-6xl mx-auto pt-24 pb-16 px-6">
+
+    <header class="bg-gradient-header text-white p-8 rounded-xl shadow-lg mb-10">
+        <h1 class="text-4xl font-extrabold flex items-center">
+            <i class="bi bi-geo-alt-fill mr-3"></i> Fundaciones Disponibles
+        </h1>
+        <p class="text-lg mt-2 opacity-90">Explora la lista y elige dónde deseas dejar tu huella.</p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div th:each="fundacion : ${fundaciones}"
+             class="bg-white rounded-xl shadow-xl border-t-4 border-[var(--primary)] hover:shadow-2xl transition duration-300 transform hover:scale-[1.01]">
+
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <i class="bi bi-building-fill mr-2 text-[var(--primary)]"></i>
+                    <span th:text="${fundacion.userName}"></span>
+                </h2>
+
+                <p class="text-sm text-gray-600 mt-3 flex items-center">
+                    <i class="bi bi-envelope-fill text-gray-400 mr-2"></i>
+                    <span th:text="${fundacion.correoUsuario}"></span>
+                </p>
+
+                <p class="text-sm text-gray-600 mt-1 flex items-center">
+                     <i class="bi bi-telephone-fill text-gray-400 mr-2"></i>
+                    <span th:text="${fundacion.telefonoUsuario}"></span>
+                </p>
+                
+                <p class="mt-4 text-gray-700 font-semibold text-sm">
+                    <i class="bi bi-patch-check-fill text-blue-500 mr-1"></i> Rol: Fundación
+                </p>
+
+                <div class="mt-6 pt-4 border-t border-gray-100 flex flex-col gap-3">
+                    
+                    <a th:href="@{'/voluntario/agendar/' + ${fundacion.id}}"
+                       class="w-full text-center px-4 py-2 rounded-lg font-semibold text-white bg-[var(--secondary)] hover:bg-teal-600 transition shadow-md">
+                        <i class="bi bi-calendar-plus-fill mr-1"></i> Agendar Visita
+                    </a>
+
+                    <a th:href="@{'/voluntario/fundaciones/' + ${fundacion.id} + '/necesidades'}"
+                       class="w-full text-center px-4 py-2 rounded-lg font-semibold text-white bg-[var(--primary)] hover:bg-indigo-700 transition shadow-md">
+                        <i class="bi bi-list-check mr-1"></i> Ver Necesidades
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:if="${#lists.isEmpty(fundaciones)}" class="text-center py-20 bg-white rounded-xl shadow-lg border-2 border-dashed border-gray-300">
+        <i class="bi bi-search-heart text-6xl text-gray-400 mb-4"></i>
+        <p class="text-2xl font-bold text-gray-800">No hay fundaciones disponibles</p>
+        <p class="text-gray-600 mt-2">Vuelve más tarde, o revisa si tu rol está configurado correctamente.</p>
+    </div>
+
+</div>
+
+</body>
+</html>

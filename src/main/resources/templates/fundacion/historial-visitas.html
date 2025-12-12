@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Visitas Recibidas - SAPIB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root { --primary: #4F46E5; --secondary: #14B8A6; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<nav class="bg-white/90 shadow-md backdrop-blur-md border-b fixed top-0 left-0 w-full z-20">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <span class="text-2xl font-bold text-[var(--primary)]">SAPIB</span>
+            <span class="text-gray-600" th:text="${#authentication.name}"></span>
+        </div>
+        <ul class="flex space-x-6 font-medium text-gray-700">
+            <li><a href="/fundacion/dashboard" class="hover:text-[var(--primary)]">Inicio</a></li>
+            <li><a href="/fundacion/necesidades" class="hover:text-[var(--primary)]">Necesidades</a></li>
+            <li><a href="/fundacion/visitas-agendadas" class="hover:text-[var(--primary)]">Visitas Pendientes</a></li>
+            <li><a href="/fundacion/historial-visitas" class="text-[var(--primary)] font-semibold">Historial Visitas</a></li>
+            <li><a href="/perfil" class="hover:text-[var(--primary)]">Perfil</a></li>
+        </ul>
+        <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 transition">Cerrar sesión</a>
+    </div>
+</nav>
+
+<section class="max-w-7xl mx-auto px-6 pt-32 pb-10">
+
+    <h1 class="text-4xl font-extrabold text-[var(--primary)] mb-6 flex items-center">
+        <i class="bi bi-journal-text mr-3"></i> Historial de Visitas Recibidas
+    </h1>
+
+    <div class="overflow-x-auto bg-white rounded-xl shadow-lg border border-gray-200">
+        <table class="w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        ID
+                    </th>
+                    <th scope="col" class="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Voluntario
+                    </th>
+                    <th scope="col" class="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Fecha Visita
+                    </th>
+                    <th scope="col" class="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Descripción
+                    </th>
+                    <th scope="col" class="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Estado
+                    </th>
+                    <th scope="col" class="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Fecha Solicitud
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody class="bg-white divide-y divide-gray-200">
+                <tr th:each="v : ${visitas}" 
+                    th:classappend="${v.estadoVisita == 'ACEPTADA'} ? 'hover:bg-green-100/70' : 
+                                     (${v.estadoVisita == 'RECHAZADA'} ? 'hover:bg-red-100/70' : 'hover:bg-yellow-50')"
+                    class="transition duration-150">
+                    
+                    <td class="p-3 text-sm font-medium text-gray-900" th:text="${v.id}"></td>
+                    <td class="p-3 text-sm text-gray-800 font-semibold" th:text="${v.voluntario.userName}"></td>
+                    <td class="p-3 text-sm text-gray-600" th:text="${#temporals.format(v.fechaVisita, 'dd-MM-yyyy HH:mm')}"></td>
+                    <td class="p-3 text-sm text-gray-600 max-w-xs truncate" th:text="${v.descripcion}"></td>
+
+                    <td class="p-3 text-sm">
+                        <span th:text="${v.estadoVisita}"
+                              th:classappend="${v.estadoVisita == 'ACEPTADA'} ? 'text-green-700 bg-green-100' : 
+                                              (${v.estadoVisita == 'PENDIENTE'} ? 'text-yellow-700 bg-yellow-100' : 'text-red-700 bg-red-100')"
+                              class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
+                        </span>
+                    </td>
+
+                    <td class="p-3 text-xs text-gray-500" th:text="${#temporals.format(v.fechaCreacion, 'dd-MM-yyyy HH:mm')}"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div th:if="${#lists.isEmpty(visitas)}" class="p-6 text-center text-gray-500">
+            <i class="bi bi-box-seam-fill text-5xl text-gray-400 mb-4"></i>
+            <p class="font-semibold">Aún no hay visitas en tu historial.</p>
+            <p class="mt-1 text-sm">Todas las solicitudes aprobadas o rechazadas aparecerán aquí.</p>
+        </div>
+        
+    </div>
+
+    <div class="text-right mt-6">
+        <a th:href="@{/reporte-visitas-fundacion}"
+           class="inline-flex items-center px-6 py-3 bg-[var(--secondary)] text-white font-semibold rounded-lg shadow-xl 
+                  hover:bg-teal-600 transition transform hover:scale-[1.01]">
+            <i class="bi bi-file-earmark-pdf-fill mr-2"></i> Descargar Reporte PDF
+        </a>
+    </div>
+
+</section>
+</body>
+</html>

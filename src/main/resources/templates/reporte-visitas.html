@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 5px;
+        }
+        th {
+            background-color: #ddd;
+            text-align: left;
+        }
+        h2 {
+            font-family: Arial, sans-serif;
+            color: #4F46E5;
+        }
+    </style>
+</head>
+<body>
+
+<h2 style="text-align: center;">Reporte de Visitas -  ${rol}</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Voluntario</th>
+        <th>Fundación</th>
+        <th>Fecha Visita</th>
+        <th>Descripción</th>
+        <th>Estado</th>
+        <th>Fecha Solicitud</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <#list visitas as v>
+        <tr>
+            <td>${v.id}</td>
+            <td>${v.voluntario.userName}</td>
+            <td>${v.fundacion.userName}</td>
+
+            <!-- 🔥 FORMATO CORRECTO PARA STRINGS ISO -->
+            <td>${v.fechaVisita?datetime.iso?string("dd-MM-yyyy HH:mm")}</td>
+
+            <td>${v.descripcion}</td>
+            <td>${v.estadoVisita}</td>
+
+            <!-- 🔥 FORMATO CORRECTO PARA STRINGS ISO -->
+            <td>${v.fechaCreacion?datetime.iso?string("dd-MM-yyyy HH:mm")}</td>
+        </tr>
+    </#list>
+    </tbody>
+</table>
+
+</body>
+</html>

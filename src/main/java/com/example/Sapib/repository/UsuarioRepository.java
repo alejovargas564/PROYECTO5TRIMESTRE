@@ -24,4 +24,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
            "LOWER(u.telefonoUsuario) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(u.rol) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Usuario> buscar(@Param("keyword") String keyword);
+    List<Usuario> findByRol(String rol);
 }

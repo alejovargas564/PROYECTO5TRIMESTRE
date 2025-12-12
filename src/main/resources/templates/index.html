@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fundación SAPIB</title>
+    <title>SAPIB</title>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -30,12 +30,12 @@
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
         <!-- LOGO -->
-        <div class="flex items-center space-x-3">
-            <img src="/img/logo sapib.jpeg"
-                 alt="Logo SAPIB"
-                 class="h-14 w-auto rounded-lg shadow-md">
-            <span class="text-2xl font-bold text-[var(--primary)]">SAPIB</span>
-        </div>
+            <div class="flex items-center space-x-3">
+                <img src="/img/sapib.jpg"
+                    alt="Logo SAPIB"
+                    class="h-14 w-auto rounded-lg shadow-md">
+                <span class="text-2xl font-bold text-[var(--primary)]">SAPIB</span>
+            </div>
 
         <!-- MENU -->
         <nav class="flex space-x-4">
@@ -77,43 +77,51 @@
     </a>
 </section>
 
-<!-- 3 COLUMNAS -->
-<section class="py-20 max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+<section class="py-20 max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
 
-    <!-- Talleres -->
-    <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition">
-        <img src="/img/TALLERES.png"
-             class="w-full rounded-lg object-cover shadow">
-        <h2 class="mt-4 text-2xl font-bold text-[var(--primary)]">Talleres </h2>
-        <p class="mt-2 text-gray-600">Sé parte del cambio: enseña, guía, transforma.</p>
-        <a th:href="@{/inscripcion}"
-           class="mt-4 inline-block px-4 py-2 bg-[var(--secondary)] text-white rounded-lg hover:bg-teal-600 transition">
-            Inscríbete »
-        </a>
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-2xl transition duration-300">
+        <img src="/img/taller.jpg"
+             class="w-full h-48 object-cover">
+             
+        <div class="p-6 text-center">
+            <h2 class="mt-2 text-2xl font-bold text-[var(--primary)]">Talleres</h2>
+            <p class="mt-2 text-gray-600 min-h-[48px]">Sé parte del cambio: enseña, guía, transforma.</p>
+            
+            <a th:href="@{/ubicaciones}"
+               class="mt-4 inline-block px-6 py-2 bg-[var(--secondary)] text-white font-semibold rounded-lg hover:bg-teal-600 transition">
+                Inscríbete »
+            </a>
+        </div>
     </div>
 
-    <!-- Ubicaciones -->
-    <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition">
-        <img src="/img/FUNDABOG.png"
-             class="w-56 h-56 rounded-full mx-auto object-cover shadow">
-        <h2 class="mt-4 text-2xl font-bold text-[var(--primary)]">Conecta con el Cambio</h2>
-        <p class="mt-2 text-gray-600">Explora la lista y elige dónde dejar tu huella</p>
-        <a th:href="@{/ubicaciones}"
-           class="mt-4 inline-block px-4 py-2 bg-[var(--secondary)] text-white rounded-lg hover:bg-teal-600 transition">
-            Ver detalles »
-        </a>
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-2xl transition duration-300">
+        <img src="/img/cambio.png"
+             class="w-full h-48 object-cover">
+             
+        <div class="p-6 text-center">
+            <h2 class="mt-2 text-2xl font-bold text-[var(--primary)]">Conecta con el Cambio</h2>
+            <p class="mt-2 text-gray-600 min-h-[48px]">Explora la lista y elige dónde dejar tu huella</p>
+            
+            <a th:href="@{/ubicaciones}"
+               class="mt-4 inline-block px-6 py-2 bg-[var(--secondary)] text-white font-semibold rounded-lg hover:bg-teal-600 transition">
+                Ver detalles »
+            </a>
+        </div>
     </div>
 
-    <!-- Visitas -->
-    <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition">
-        <img src="/img/VISITAS.png"
-             class="w-56 h-56 rounded-full mx-auto object-cover shadow">
-        <h2 class="mt-4 text-2xl font-bold text-[var(--primary)]">Donaciones</h2>
-        <p class="mt-2 text-gray-600">Tu aporte es pequeño para ti, pero inmenso para ellos</p>
-        <a th:href="@{/visitas}"
-           class="mt-4 inline-block px-4 py-2 bg-[var(--secondary)] text-white rounded-lg hover:bg-teal-600 transition">
-            Agendar Visita »
-        </a>
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-2xl transition duration-300">
+        <img src="/img/donacion.jpg"
+             class="w-full h-48 object-cover">
+             
+        <div class="p-6 text-center">
+            <h2 class="mt-2 text-2xl font-bold text-[var(--primary)]">Donaciones</h2>
+            <p class="mt-2 text-gray-600 min-h-[48px]">Tu aporte es pequeño para ti, pero inmenso para ellos</p>
+            
+            <a th:href="@{/visitas}"
+               class="mt-4 inline-block px-6 py-2 bg-[var(--secondary)] text-white font-semibold rounded-lg hover:bg-teal-600 transition">
+                Agendar Visita »
+            </a>
+        </div>
     </div>
 
 </section>
@@ -122,7 +130,7 @@
 <section class="py-20 bg-indigo-50">
     <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center px-6">
 
-        <img src="/img/SAPIF.png"
+        <img src="/img/impacto.jpg"
              class="rounded-xl shadow-lg h-80 object-cover">
 
         <div>

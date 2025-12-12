@@ -1,5 +1,6 @@
 package com.example.Sapib.utils;
 
+import com.example.Sapib.model.Visita; // <--- IMPORTACIÓN AÑADIDA
 import freemarker.template.Template;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -44,6 +45,30 @@ public class PdfGenerator {
 
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=reporte-usuarios.pdf");
+
+        OutputStream out = response.getOutputStream();
+        ITextRenderer renderer = new ITextRenderer();
+        renderer.setDocumentFromString(html);
+        renderer.layout();
+        renderer.createPDF(out);
+        out.close();
+    }
+    
+    // Método para generar el reporte de Visitas
+    public void generarPdfVisitas(
+            String rol,
+            List<Visita> visitas,
+            HttpServletResponse response) throws Exception {
+
+        Map<String, Object> model = new HashMap<>();
+        model.put("visitas", visitas);
+        model.put("rol", rol); // Para personalizar el título del reporte
+
+        Template template = configurer.getConfiguration().getTemplate("reporte-visitas.html");
+        String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, model);
+
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=reporte-visitas-" + rol.toLowerCase() + ".pdf");
 
         OutputStream out = response.getOutputStream();
         ITextRenderer renderer = new ITextRenderer();
