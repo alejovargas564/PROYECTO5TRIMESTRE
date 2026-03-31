@@ -2,20 +2,21 @@ package com.example.Sapib.controller;
 
 import com.example.Sapib.model.Usuario;
 import com.example.Sapib.model.Visita;
-import com.example.Sapib.model.Necesidad; // Importado
+import com.example.Sapib.model.Necesidad;
 import com.example.Sapib.service.UsuarioService;
 import com.example.Sapib.service.VisitaService;
-import com.example.Sapib.service.NecesidadService; // Importado
+import com.example.Sapib.service.NecesidadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ModelAttribute; // Importado
-import org.springframework.web.bind.annotation.PostMapping; // Importado
-import org.springframework.web.bind.annotation.RequestParam; // Importación necesaria
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes; // <-- IMPORTACIÓN NECESARIA
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class FundacionController {
     @Autowired
     private VisitaService visitaService;
     
-    @Autowired // INYECCIÓN DEL SERVICIO DE NECESIDAD
+    @Autowired
     private NecesidadService necesidadService; 
 
     @GetMapping("/fundacion/dashboard")
@@ -98,17 +99,16 @@ public class FundacionController {
     // 4. GESTIÓN DE NECESIDADES (CRUD) - CON FILTRO
     // ==========================================================
 
-    // Vista principal y listado (Maneja tanto listado, filtros, como la carga inicial del formulario)
+    /**
+     * Vista principal y listado (Maneja listado, filtros y la carga inicial/edición del formulario).
+     */
     @GetMapping("/fundacion/necesidades")
     @PreAuthorize("hasRole('FUNDACION')")
     public String gestionarNecesidades(
-        // --- NUEVOS PARÁMETROS DE FILTRO ---
         @RequestParam(required = false) String titulo, 
         @RequestParam(required = false) String tipo,
-        // ------------------------------------
         Model model, 
-        Authentication auth, 
-        @ModelAttribute Necesidad necesidad) {
+        Authentication auth) {
         
         String userName = auth.getName();
         Usuario fundacion = usuarioService.buscarPorUserName(userName)
@@ -121,22 +121,31 @@ public class FundacionController {
         model.addAttribute("necesidades", necesidades);
         model.addAttribute("fundacionId", fundacion.getId());
         
-        // --- Añadir parámetros de filtro al modelo para retenerlos en el formulario ---
+        // Añadir parámetros de filtro al modelo para retenerlos en el formulario
         model.addAttribute("titulo", titulo);
         model.addAttribute("tipo", tipo);
         
-        // Si el objeto 'necesidad' no fue pasado (es decir, es una carga normal), inicializamos uno nuevo.
-        if (necesidad.getTitulo() == null && necesidad.getId() == null) {
+        // CORRECCIÓN CLAVE: Solo inicializa una nueva Necesidad si NO está ya en el modelo
+        // (el objeto 'necesidad' es colocado por 'editarNecesidad' a través de FlashAttributes)
+        if (!model.containsAttribute("necesidad")) {
              model.addAttribute("necesidad", new Necesidad());
         }
 
-        return "fundacion/necesidades"; // Vista principal de gestión
+        return "fundacion/necesidades";
     }
 
-    // Editar necesidad (Carga los datos en el formulario)
+    /**
+     * Carga la necesidad y **REDIRIGE** al método principal usando Flash Attributes.
+     * Esto limpia la petición y fuerza a la vista a usar el objeto cargado para la edición.
+     */
     @GetMapping("/fundacion/necesidades/editar/{id}")
     @PreAuthorize("hasRole('FUNDACION')")
-    public String editarNecesidad(@PathVariable Integer id, Model model, Authentication auth) {
+    public String editarNecesidad(
+            @PathVariable Integer id, 
+            Model model, 
+            Authentication auth,
+            RedirectAttributes redirectAttributes) { // <-- NUEVO ARGUMENTO
+        
         Necesidad necesidad = necesidadService.buscarPorId(id)
                 .orElseThrow(() -> new RuntimeException("Necesidad no encontrada"));
         
@@ -145,10 +154,11 @@ public class FundacionController {
              throw new RuntimeException("Acceso denegado a esta necesidad");
         }
 
-        // Usamos 'forward' para reenviar la solicitud al método gestionarNecesidades
-        // que cargará el objeto 'necesidad' en el modelo para el formulario de edición.
-        model.addAttribute("necesidad", necesidad);
-        return "forward:/fundacion/necesidades"; 
+        // 🎯 CAMBIO CLAVE: Usamos Flash Attribute para enviar el objeto en la redirección
+        redirectAttributes.addFlashAttribute("necesidad", necesidad);
+        
+        // 🎯 CAMBIO CLAVE: Hacemos una redirección, no un forward
+        return "redirect:/fundacion/necesidades"; 
     }
 
     // Guardar (Crear o Actualizar)
@@ -172,3 +182,4 @@ public class FundacionController {
         return "redirect:/fundacion/necesidades?eliminado";
     }
 }
+
