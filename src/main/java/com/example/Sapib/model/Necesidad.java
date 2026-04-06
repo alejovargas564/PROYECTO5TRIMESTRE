@@ -23,17 +23,25 @@ public class Necesidad {
     @Column(length = 1000)
     private String descripcion;
 
-    @Column(name = "tipo_necesidad") // Ej: Taller, Materiales, Mentoría
+    @Column(name = "tipo_necesidad") 
     private String tipoNecesidad;
     
     @Column(nullable = false)
-    private boolean estadoActivo = true; // Si la necesidad está activa o ya fue cubierta
+    private boolean estadoActivo = true;
 
-    // Relación Many-to-One: Una necesidad pertenece a una Fundación (que es un Usuario)
+    // NUEVO CAMPO: Nivel de Prioridad (BAJA, MEDIA, ALTA)
+    @Column(nullable = false)
+    private String prioridad = "BAJA";
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_fundacion", nullable = false)
     private Usuario fundacion;
 
-    @Column(name = "fecha_publicacion", nullable = false)
-    private LocalDateTime fechaPublicacion = LocalDateTime.now();
+    @Column(name = "fecha_publicacion", nullable = false, updatable = false)
+    private LocalDateTime fechaPublicacion;
+
+    @PrePersist
+    protected void onCreate() {
+        this.fechaPublicacion = LocalDateTime.now();
+    }
 }

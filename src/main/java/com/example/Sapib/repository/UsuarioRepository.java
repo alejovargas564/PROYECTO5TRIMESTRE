@@ -13,6 +13,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     // Buscar usuario por nombre de usuario
     Optional<Usuario> findByUserName(String userName);
+    Optional<Usuario> findByNumeroDocumento(String documento);
+    Optional<Usuario> findByCorreoUsuarioOrNumeroDocumento(String correo, String documento);
 
     // Validar si existe un username
     boolean existsByUserName(String userName);

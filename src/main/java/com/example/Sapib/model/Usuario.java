@@ -37,9 +37,7 @@ public class Usuario {
     @Column(name = "create_at")
     private LocalDateTime createAt = LocalDateTime.now();
 
-    // ========================================
-    // GETTERS Y SETTERS
-    // ========================================
+  
 
     public Integer getId() {
         return id;
@@ -119,5 +117,14 @@ public class Usuario {
 
     public void setCreateAt(LocalDateTime createAt) {
         this.createAt = createAt;
+    }
+    private String sector;
+
+    public String getSector() {
+        return sector;
+    }
+
+    public void setSector(String sector) {
+        this.sector = sector;
     }
 }

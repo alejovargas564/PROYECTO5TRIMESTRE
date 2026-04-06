@@ -4,6 +4,7 @@ import com.example.Sapib.model.Usuario;
 import com.example.Sapib.model.Visita;
 import com.example.Sapib.service.UsuarioService;
 import com.example.Sapib.service.VisitaService;
+import com.example.Sapib.repository.UsuarioRepository; // <-- IMPORTANTE: Agregar esta importación
 import com.example.Sapib.utils.PdfGenerator;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam; // Importación necesaria
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,20 +27,29 @@ public class ReporteVisitaController {
     private UsuarioService usuarioService;
 
     @Autowired
+    private UsuarioRepository usuarioRepository; // <-- AGREGADO: Inyectar el repositorio
+
+    @Autowired
     private PdfGenerator pdfGenerator;
 
-    // MÉTODO MODIFICADO: Ahora acepta los parámetros de filtro
-    private List<Visita> getVisitasByRole(Authentication auth, String fundacion, String estado) {
-        String userName = auth.getName();
-        Usuario usuario = usuarioService.buscarPorUserName(userName)
+    // MÉTODO AUXILIAR: Búsqueda flexible para identificar al usuario por Correo, Documento o Username
+    private Usuario obtenerUsuarioLogueado(Authentication auth) {
+        String loginInfo = auth.getName();
+        return usuarioRepository.findByCorreoUsuarioOrNumeroDocumento(loginInfo, loginInfo)
+                .or(() -> usuarioRepository.findByUserName(loginInfo))
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    // MÉTODO MODIFICADO: Ahora usa la búsqueda flexible centralizada
+    private List<Visita> getVisitasByRole(Authentication auth, String fundacion, String estado) {
+        // CORREGIDO: Usamos el nuevo buscador en lugar de solo buscar por UserName
+        Usuario usuario = obtenerUsuarioLogueado(auth);
 
         if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             return visitaService.listarTodasVisitas();
         } else if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_FUNDACION"))) {
             return visitaService.listarHistorialFundacion(usuario.getId());
         } else if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_VOLUNTARIO"))) {
-            // CAMBIO CLAVE: Llama al método con filtros para el voluntario
             return visitaService.filtrarHistorialVoluntario(usuario.getId(), fundacion, estado);
         }
         return List.of();
@@ -53,16 +63,18 @@ public class ReporteVisitaController {
     public void descargarPDFVisitas(
             HttpServletResponse response, 
             Authentication auth,
-            // --- NUEVOS PARÁMETROS RECIBIDOS ---
             @RequestParam(required = false) String fundacion,
             @RequestParam(required = false) String estado) 
             throws IOException {
 
-        // Se llama al método con los nuevos parámetros
+        // Se llama al método con los nuevos parámetros de búsqueda flexible
         List<Visita> visitas = getVisitasByRole(auth, fundacion, estado);
         
-        // Obtiene el rol (ej: ADMIN, FUNDACION) para el nombre del archivo PDF
-        String rol = auth.getAuthorities().stream().findFirst().get().getAuthority().replace("ROLE_", "");
+        // Obtiene el rol de forma segura
+        String rol = auth.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .orElse("USUARIO");
 
         try {
             pdfGenerator.generarPdfVisitas(rol, visitas, response);

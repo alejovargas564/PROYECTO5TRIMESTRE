@@ -3,10 +3,11 @@ package com.example.Sapib.controller;
 import com.example.Sapib.model.AgendarVisitaDTO;
 import com.example.Sapib.model.Usuario;
 import com.example.Sapib.model.Visita;
-import com.example.Sapib.model.Necesidad; // Importado
+import com.example.Sapib.model.Necesidad;
 import com.example.Sapib.service.UsuarioService;
 import com.example.Sapib.service.VisitaService;
-import com.example.Sapib.service.NecesidadService; // Importado
+import com.example.Sapib.service.NecesidadService;
+import com.example.Sapib.repository.UsuarioRepository; // <-- IMPORTANTE
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -23,58 +24,56 @@ public class VoluntarioController {
     private UsuarioService usuarioService;
 
     @Autowired
+    private UsuarioRepository usuarioRepository; // <-- AGREGADO para búsqueda flexible
+
+    @Autowired
     private VisitaService visitaService;
     
-    @Autowired // NUEVO: Inyección del servicio de Necesidad
+    @Autowired 
     private NecesidadService necesidadService;
 
-    // Redirección del login: redirige directamente al listado de fundaciones
+    // MÉTODO AUXILIAR: Para identificar al voluntario por Correo, Documento o Username
+    private Usuario obtenerVoluntarioLogueado(Authentication auth) {
+        String loginInfo = auth.getName();
+        return usuarioRepository.findByCorreoUsuarioOrNumeroDocumento(loginInfo, loginInfo)
+                .or(() -> usuarioRepository.findByUserName(loginInfo))
+                .orElseThrow(() -> new RuntimeException("Voluntario actual no encontrado"));
+    }
+
     @GetMapping("/voluntario/dashboard")
     @PreAuthorize("hasRole('VOLUNTARIO')")
     public String dashboardVoluntario() {
         return "redirect:/voluntario/fundaciones";
     }
 
-    // ==========================================================
-    // 1. LISTADO DE FUNDACIONES (El dashboard del voluntario)
-    // ==========================================================
     @GetMapping("/voluntario/fundaciones")
     @PreAuthorize("hasRole('VOLUNTARIO')")
     public String listarFundaciones(Model model) {
         List<Usuario> fundaciones = usuarioService.listarFundaciones();
         model.addAttribute("fundaciones", fundaciones);
-        return "voluntario/fundaciones"; // Se crea una nueva vista para esto
+        return "voluntario/fundaciones";
     }
 
-    // ==========================================================
-    // 2. AGENDAR VISITA (FORMULARIO)
-    // ==========================================================
     @GetMapping("/voluntario/agendar/{idFundacion}")
     @PreAuthorize("hasRole('VOLUNTARIO')")
     public String mostrarFormularioVisita(@PathVariable Integer idFundacion, Model model) {
-
         Usuario fundacion = usuarioService.buscarPorId(idFundacion)
                 .orElseThrow(() -> new RuntimeException("Fundación no encontrada"));
 
         model.addAttribute("fundacion", fundacion);
         
         AgendarVisitaDTO visitaForm = new AgendarVisitaDTO();
-        visitaForm.setIdFundacion(idFundacion); // Asegurar que el ID se pase al DTO
+        visitaForm.setIdFundacion(idFundacion);
         model.addAttribute("visitaForm", visitaForm);
 
         return "voluntario/agendar-visita";
     }
 
-    // ==========================================================
-    // 3. GUARDAR VISITA
-    // ==========================================================
     @PostMapping("/voluntario/agendar/guardar")
     @PreAuthorize("hasRole('VOLUNTARIO')")
     public String guardarVisita(@ModelAttribute("visitaForm") AgendarVisitaDTO form, Authentication auth) {
-
-        String userName = auth.getName();
-        Usuario voluntario = usuarioService.buscarPorUserName(userName)
-                .orElseThrow(() -> new RuntimeException("Voluntario actual no encontrado"));
+        // CORREGIDO: Búsqueda flexible
+        Usuario voluntario = obtenerVoluntarioLogueado(auth);
 
         visitaService.agendarVisita(
                 voluntario.getId(),
@@ -83,64 +82,49 @@ public class VoluntarioController {
                 form.getDescripcion()
         );
 
-        return "redirect:/voluntario/historial?agendada"; // Redirige al historial
+        return "redirect:/voluntario/historial?agendada";
     }
 
-    // ==========================================================
-    // 4. HISTORIAL DE VISITAS (VOLUNTARIO) - CON FILTRO MULTICRITERIO
-    // ==========================================================
     @GetMapping("/voluntario/historial")
     @PreAuthorize("hasRole('VOLUNTARIO')")
     public String historialVoluntario(
-            // --- NUEVOS PARÁMETROS DE FILTRO ---
             @RequestParam(required = false) String fundacion,
             @RequestParam(required = false) String estado,
-            // ------------------------------------
             Model model, 
             Authentication auth) {
         
-        String userName = auth.getName();
-        Usuario voluntario = usuarioService.buscarPorUserName(userName)
-                .orElseThrow(() -> new RuntimeException("Voluntario actual no encontrado"));
+        // CORREGIDO: Búsqueda flexible
+        Usuario voluntario = obtenerVoluntarioLogueado(auth);
 
-        // Llama al NUEVO método del servicio que aplica los filtros
         List<Visita> visitas = visitaService.filtrarHistorialVoluntario(
                 voluntario.getId(), fundacion, estado);
 
         model.addAttribute("visitas", visitas);
-        
-        // Se pasan los parámetros de filtro al modelo para mantenerlos en el formulario
-        model.addAttribute("fundacion", fundacion);
+        model.addAttribute("fundacionNombreFiltro", fundacion); // Nombre ajustado para no confundir con el objeto usuario
         model.addAttribute("estado", estado);
 
         return "voluntario/historial";
     }
 
-    // ==========================================================
-    // 5. VER NECESIDADES PUBLICADAS POR UNA FUNDACION ESPECÍFICA
-    // ==========================================================
     @GetMapping("/voluntario/fundaciones/{idFundacion}/necesidades")
     @PreAuthorize("hasRole('VOLUNTARIO')")
     public String listarNecesidadesPorFundacion(@PathVariable Integer idFundacion, Model model) {
-        
         Usuario fundacion = usuarioService.buscarPorId(idFundacion)
                 .orElseThrow(() -> new RuntimeException("Fundación no encontrada"));
         
-        // Obtenemos solo las necesidades activas para esta fundación
         List<Necesidad> necesidades = necesidadService.listarPorFundacion(idFundacion); 
         
         model.addAttribute("fundacion", fundacion);
         model.addAttribute("necesidades", necesidades);
-        return "voluntario/necesidades-fundacion"; // Vista de lista filtrada
+        return "voluntario/necesidades-fundacion";
     }
 
-    // 6. VER TODAS LAS NECESIDADES ACTIVAS (Ruta genérica)
     @GetMapping("/voluntario/necesidades")
     @PreAuthorize("hasRole('VOLUNTARIO')")
     public String listarNecesidadesActivas(Model model) {
         List<Necesidad> necesidades = necesidadService.listarActivas();
         model.addAttribute("necesidades", necesidades);
-        return "voluntario/necesidades"; // Nueva vista que creamos
+        return "voluntario/necesidades";
     }
     
     @GetMapping("/voluntario/oportunidades")

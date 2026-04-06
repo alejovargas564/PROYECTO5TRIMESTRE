@@ -19,28 +19,28 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private UsuarioRepository usuarioRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String loginUsername) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String loginInput) throws UsernameNotFoundException {
 
-        // Buscar por loginUsername (nuevo campo)
-        Usuario usuario = usuarioRepository.findByUserName(loginUsername)
+        // CAMBIO CLAVE: Buscamos por Correo O Documento usando el valor que viene del login
+        Usuario usuario = usuarioRepository.findByCorreoUsuarioOrNumeroDocumento(loginInput, loginInput)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("Usuario no encontrado: " + loginUsername)
+                        new UsernameNotFoundException("No se encontró usuario con: " + loginInput)
                 );
 
-        // Si el usuario NO está activo / aprobado
+        // Mantenemos tu validación de cuenta activa
         if (!usuario.isEstadoUsuario()) {
             throw new UsernameNotFoundException(
                     "Tu cuenta aún no ha sido aprobada por un administrador."
             );
         }
 
-        // Spring Security requiere el prefijo "ROLE_"
+        // Aseguramos el prefijo ROLE_ para Spring Security
         String rolSpring = usuario.getRol().startsWith("ROLE_")
                 ? usuario.getRol()
                 : "ROLE_" + usuario.getRol();
 
         return new User(
-                usuario.getUserName(),  // ⬅️ Ahora el login correcto
+                usuario.getCorreoUsuario(), // Usamos el correo como identificador de la sesión
                 usuario.getPassword(),
                 Collections.singletonList(new SimpleGrantedAuthority(rolSpring))
         );

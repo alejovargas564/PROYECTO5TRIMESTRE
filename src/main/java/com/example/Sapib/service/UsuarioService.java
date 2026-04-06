@@ -25,9 +25,15 @@ public class UsuarioService {
     // CREAR USUARIO
     // ========================================================
     public Usuario crearUsuario(Usuario usuario) {
-
+        // 1. Validar si el Nombre de Usuario ya existe
         if (usuarioRepository.existsByUserName(usuario.getUserName())) {
             throw new RuntimeException("El nombre de usuario ya está en uso");
+        }
+
+        // 2. NUEVA VALIDACIÓN: Validar si el Correo o Documento ya existen
+        // Esto es vital ahora que los usamos para el Login
+        if (usuarioRepository.findByCorreoUsuarioOrNumeroDocumento(usuario.getCorreoUsuario(), usuario.getNumeroDocumento()).isPresent()) {
+            throw new RuntimeException("El correo electrónico o el número de documento ya están registrados");
         }
 
         // Cifrar contraseña al crear
@@ -42,7 +48,7 @@ public class UsuarioService {
         return usuarioRepository.findById(id);
     }
 
-    // Buscar por username
+    // Buscar por username (Se mantiene por compatibilidad)
     public Optional<Usuario> buscarPorUserName(String username) {
         return usuarioRepository.findByUserName(username);
     }
@@ -59,14 +65,22 @@ public class UsuarioService {
 
         return usuarioRepository.findById(id).map(usuario -> {
 
-            // Validar si cambiaron username
+            // Validar si cambiaron username y si el nuevo ya existe
             if (!usuario.getUserName().equals(usuarioActualizado.getUserName())) {
                 if (usuarioRepository.existsByUserName(usuarioActualizado.getUserName())) {
                     throw new RuntimeException("El nombre de usuario ya está en uso");
                 }
             }
 
-            // Admin puede actualizar estos campos:
+            // Validar si cambiaron correo o documento y si ya existen en otro usuario
+            Optional<Usuario> existente = usuarioRepository.findByCorreoUsuarioOrNumeroDocumento(
+                    usuarioActualizado.getCorreoUsuario(), usuarioActualizado.getNumeroDocumento());
+            
+            if (existente.isPresent() && !existente.get().getId().equals(id)) {
+                throw new RuntimeException("El correo o documento ya pertenecen a otro usuario");
+            }
+
+            // Actualización de campos
             usuario.setUserName(usuarioActualizado.getUserName());
             usuario.setCorreoUsuario(usuarioActualizado.getCorreoUsuario());
             usuario.setTelefonoUsuario(usuarioActualizado.getTelefonoUsuario());
@@ -74,11 +88,11 @@ public class UsuarioService {
             usuario.setNumeroDocumento(usuarioActualizado.getNumeroDocumento());
             usuario.setRol(usuarioActualizado.getRol());
             usuario.setEstadoUsuario(usuarioActualizado.isEstadoUsuario());
+            usuario.setSector(usuarioActualizado.getSector()); // Aseguramos el campo sector
 
             // Contraseña solo si envían una nueva
-            if (usuarioActualizado.getPassword() != null &&
-                    !usuarioActualizado.getPassword().trim().isEmpty()) {
-
+            if (usuarioActualizado.getPassword() != null && 
+                !usuarioActualizado.getPassword().trim().isEmpty()) {
                 usuario.setPassword(passwordEncoder.encode(usuarioActualizado.getPassword()));
             }
 
@@ -98,7 +112,7 @@ public class UsuarioService {
     }
 
     // ========================================================
-    // FILTROS
+    // FILTROS (Optimizado)
     // ========================================================
     public List<Usuario> filtrarUsuarios(String nombre, LocalDateTime desde, LocalDateTime hasta) {
         List<Usuario> lista = usuarioRepository.findAll();
@@ -112,15 +126,13 @@ public class UsuarioService {
 
         if (desde != null) {
             lista = lista.stream()
-                    .filter(u -> u.getCreateAt() != null &&
-                            !u.getCreateAt().isBefore(desde))
+                    .filter(u -> u.getCreateAt() != null && !u.getCreateAt().isBefore(desde))
                     .collect(Collectors.toList());
         }
 
         if (hasta != null) {
             lista = lista.stream()
-                    .filter(u -> u.getCreateAt() != null &&
-                            !u.getCreateAt().isAfter(hasta))
+                    .filter(u -> u.getCreateAt() != null && !u.getCreateAt().isAfter(hasta))
                     .collect(Collectors.toList());
         }
 
@@ -131,43 +143,25 @@ public class UsuarioService {
         return filtrarUsuarios(nombre, null, null);
     }
     
-    // ========================================================
-    // NUEVO: LISTAR FUNDACIONES PARA VOLUNTARIO
-    // ========================================================
     public List<Usuario> listarFundaciones() {
         return usuarioRepository.findByRol("ROLE_FUNDACION");
     }
-
-    // ========================================================
-    // PERFIL - CAMPOS PERMITIDOS
-    // ========================================================
 
     public String encriptarPassword(String password) {
         return passwordEncoder.encode(password);
     }
 
-    /**
-     * Actualiza SOLO los campos permitidos del perfil:
-     * - Teléfono
-     * - Contraseña (si vino desde el controller)
-     *
-     * Nunca toca: username, correo, rol, documentos, estado.
-     */
     @Transactional
     public Usuario actualizarDatosPerfil(Usuario usuario) {
-
         Usuario original = usuarioRepository.findById(usuario.getId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // Solo teléfono
         original.setTelefonoUsuario(usuario.getTelefonoUsuario());
 
-        // Solo contraseña si viene nueva
         if (usuario.getPassword() != null && !usuario.getPassword().trim().isEmpty()) {
-            original.setPassword(usuario.getPassword()); // ya está encriptada desde controller
+            original.setPassword(usuario.getPassword()); 
         }
 
         return usuarioRepository.save(original);
     }
-
 }

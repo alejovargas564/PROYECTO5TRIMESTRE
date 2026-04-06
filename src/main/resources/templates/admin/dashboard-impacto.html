@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Impacto- SAPIB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary: #4F46E5; /* Índigo */
+            --secondary: #14B8A6; /* Teal */
+            --warm: #FFB703; /* Amarillo */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen text-gray-800">
+
+<nav class="bg-white/95 shadow-md backdrop-blur-md border-b fixed top-0 left-0 w-full z-20">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+             <img src="/img/sapib.jpg" alt="Logo SAPIB" class="h-14 w-auto rounded-lg shadow-md">
+            <span class="text-2xl font-bold text-[var(--primary)]">SAPIB</span>
+            <span class="text-gray-600 font-medium ml-4">Análisis</span>
+        </div>
+
+        <ul class="flex space-x-6 font-medium text-gray-700">
+             <li><a href="/admin-home" class="hover:text-[var(--primary)] transition">Inicio</a></li>
+             <li><a href="/admin/dashboard-impacto" class="text-[var(--primary)] font-semibold border-b-2 border-[var(--primary)]">Estadísticas</a></li>
+        </ul>
+
+        <form th:action="@{/logout}" method="post">
+            <button class="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 shadow transition text-sm">
+                Cerrar sesión
+            </button>
+        </form>
+    </div>
+</nav>
+
+<section class="max-w-7xl mx-auto pt-28 pb-16 px-6">
+    
+    <header class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-purple-500 mb-10">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-extrabold text-gray-900 flex items-center">
+                    <i class="bi bi-graph-up-arrow text-purple-500 mr-3"></i> 
+                    Impacto Social
+                </h1>
+                <p class="mt-2 text-lg text-gray-600">
+                    Recaudación y visitas general
+                </p>
+            </div>
+            <a href="/admin-home" class="text-[var(--primary)] font-bold hover:underline">
+                <i class="bi bi-arrow-left"></i> Regresar
+            </a>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-[var(--primary)]">
+            <p class="text-gray-500 font-semibold uppercase text-xs">Recaudado Total</p>
+            <h2 class="text-3xl font-bold text-gray-800" th:text="${resumen != null ? '$' + resumen.total_recaudado_global : '$0'}">$0</h2>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-[var(--secondary)]">
+            <p class="text-gray-500 font-semibold uppercase text-xs">Visitas Globales</p>
+            <h2 class="text-3xl font-bold text-gray-800" th:text="${resumen != null ? resumen.total_visitas_global : '0'}">0</h2>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-[var(--warm)]">
+            <p class="text-gray-500 font-semibold uppercase text-xs">Promedio de Donación</p>
+            <h2 class="text-3xl font-bold text-gray-800" th:text="${resumen != null ? '$' + #numbers.formatDecimal(resumen.promedio_donacion, 1, 0) : '$0'}">$0</h2>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h3 class="text-xl font-bold mb-6 flex items-center text-gray-800">
+                <i class="bi bi-pie-chart-fill text-[var(--secondary)] mr-2"></i> 
+                Distribución de Visitas por Fundación
+            </h3>
+            <div class="relative h-72">
+                <canvas id="chartVisitas"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-500">
+            <h3 class="text-xl font-bold mb-2 flex items-center text-red-600">
+                <i class="bi bi-cash-stack mr-2"></i> Fundaciones con Menor Recaudación
+            </h3>
+            <p class="text-sm text-gray-500 mb-6 font-medium">Prioridad de impulso publicitario basado en donaciones bajas.</p>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-gray-400 border-b text-xs uppercase tracking-wider">
+                            <th class="pb-3 px-2">Fundación</th>
+                            <th class="pb-3 text-center">Visitas</th>
+                            <th class="pb-3 text-right">Total Donado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700">
+                        <tr th:each="f : ${riesgo}" class="border-b hover:bg-gray-50 transition">
+                            <td class="py-4 px-2 font-bold text-gray-800" th:text="${f.nombre}">-</td>
+                            <td class="py-4 text-center">
+                                <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">
+                                    <i class="bi bi-eye mr-1"></i> <span th:text="${f.visitas}">0</span>
+                                </span>
+                            </td>
+                            <td class="py-4 text-right">
+                                <span class="bg-red-100 text-red-700 px-3 py-1 rounded-lg font-extrabold" 
+                                      th:text="'$' + ${f.recaudado}">
+                                    $0
+                                </span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(riesgo)}">
+                            <td colspan="3" class="py-8 text-center text-gray-400 italic font-medium">
+                                No se detectaron fundaciones con recaudación crítica.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Recibimos los datos que Python procesó y Java nos pasó
+    const datosVisitas = /*[[${categorias}]]*/ {};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('chartVisitas').getContext('2d');
+        
+        if (Object.keys(datosVisitas).length > 0) {
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(datosVisitas),
+                    datasets: [{
+                        data: Object.values(datosVisitas),
+                        backgroundColor: [
+                            '#4F46E5', // Indigo
+                            '#14B8A6', // Teal
+                            '#FFB703', // Yellow
+                            '#F43F5E', // Rose
+                            '#8B5CF6'  // Violet
+                        ],
+                        hoverOffset: 20,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: { size: 12, weight: '600' }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw} visitas`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%' // Hace que la dona se vea más delgada y elegante
+                }
+            });
+        }
+    });
+    /*]]>*/
+</script>
+
+</body>
+</html>
