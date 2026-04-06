@@ -25,24 +25,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                // 1. RUTAS ESTÁTICAS
-                .requestMatchers("/css/**", "/index","/conocenos", "/js/**", "/img/**").permitAll()
-
-                // 2. RUTAS PÚBLICAS
-                .requestMatchers("/", "/login", "/registro").permitAll()
-
-                // 3. RUTAS ADMIN
-                .requestMatchers("/usuarios/**").hasRole("ADMIN")
-
-                // 3.1 RUTAS DE PERFIL (TODOS LOS ROLES PUEDEN)
-                .requestMatchers("/perfil", "/perfil/**")
-                    .hasAnyRole("ADMIN", "FUNDACION", "VOLUNTARIO")
-
-                // 4. RUTAS POR ROL
+                .requestMatchers("/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
+                .requestMatchers("/", "/login", "/registro", "/index", "/conocenos").permitAll()
+                
+                // Reglas de Roles (Spring busca ROLE_ interno)
+                .requestMatchers("/admin/**", "/usuarios/**").hasRole("ADMIN")
                 .requestMatchers("/fundacion/**").hasRole("FUNDACION")
                 .requestMatchers("/voluntario/**").hasRole("VOLUNTARIO")
-
-                // 5. CUALQUIER OTRA RUTA
+                
+                .requestMatchers("/perfil/**").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -54,44 +45,38 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("/login?logout=true")
                 .invalidateHttpSession(true)
-                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
                 .permitAll()
             )
-            .csrf(csrf -> csrf.disable()); // TEMPORAL PARA TESTING
+            .csrf(csrf -> csrf.disable()); 
 
         return http.build();
     }
 
     @Bean
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
-        return new AuthenticationSuccessHandler() {
-            @Override
-            public void onAuthenticationSuccess(HttpServletRequest request,
-                                               HttpServletResponse response,
-                                               Authentication authentication) throws IOException, ServletException {
+        return (request, response, authentication) -> {
+            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+            String redirectUrl = "/"; 
 
-                Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-                String redirectUrl = "/home";
-
-                for (GrantedAuthority authority : authorities) {
-                    String role = authority.getAuthority();
-
-                    if (role.equals("ROLE_ADMIN")) {
-                        redirectUrl = "/admin/home";
-                        break;
-                    } else if (role.equals("ROLE_FUNDACION")) {
-                        redirectUrl = "/fundacion/dashboard";
-                        break;
-                    } else if (role.equals("ROLE_VOLUNTARIO")) {
-                        redirectUrl = "/voluntario/dashboard";
-                        break;
-                    }
+            for (GrantedAuthority authority : authorities) {
+                String role = authority.getAuthority();
+                
+                // Usamos contains para que funcione tanto con "ADMIN" como con "ROLE_ADMIN"
+                if (role.contains("ADMIN")) {
+                    redirectUrl = "/admin/dashboard-impacto";
+                    break;
+                } else if (role.contains("FUNDACION")) {
+                    redirectUrl = "/fundacion/dashboard";
+                    break;
+                } else if (role.contains("VOLUNTARIO")) {
+                    redirectUrl = "/voluntario/dashboard";
+                    break;
                 }
-
-                response.sendRedirect(redirectUrl);
             }
+            response.sendRedirect(redirectUrl);
         };
     }
 

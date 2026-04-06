@@ -2,7 +2,7 @@ package com.example.Sapib.controller;
 
 import com.example.Sapib.model.Usuario;
 import com.example.Sapib.service.UsuarioService;
-import com.example.Sapib.repository.UsuarioRepository; // <-- AGREGADO
+import com.example.Sapib.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,9 +20,8 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @Autowired
-    private UsuarioRepository usuarioRepository; // <-- AGREGADO
+    private UsuarioRepository usuarioRepository;
 
-    // Método auxiliar centralizado para el perfil
     private Usuario obtenerUsuarioLogueado(Authentication auth) {
         String loginInfo = auth.getName();
         return usuarioRepository.findByCorreoUsuarioOrNumeroDocumento(loginInfo, loginInfo)
@@ -42,14 +41,49 @@ public class UsuarioController {
     }
 
     @PostMapping("/registro")
-    public String procesarRegistro(@ModelAttribute Usuario usuario) {
-        if (!"VOLUNTARIO".equals(usuario.getRol()) && !"FUNDACION".equals(usuario.getRol())) {
-            return "redirect:/registro?error=rol_invalido";
+    public String procesarRegistro(@ModelAttribute Usuario usuario, Model model) {
+        // EQUIVALENTE A TRY:
+        try {
+            // 1. Validar Roles permitidos
+            if (!"VOLUNTARIO".equals(usuario.getRol()) && !"FUNDACION".equals(usuario.getRol())) {
+                throw new IllegalArgumentException("Rol no válido seleccionado.");
+            }
+
+            // 2. Validar que el Teléfono sea solo números
+            if (usuario.getTelefonoUsuario() != null && !usuario.getTelefonoUsuario().matches("\\d+")) {
+                throw new IllegalArgumentException("El teléfono debe contener solo números.");
+            }
+
+            // 3. Validar que el Documento sea solo números
+            if (usuario.getNumeroDocumento() != null && !usuario.getNumeroDocumento().matches("\\d+")) {
+                throw new IllegalArgumentException("El número de documento debe contener solo números.");
+            }
+
+            // 4. Validar Correo básico
+            if (!usuario.getCorreoUsuario().contains("@")) {
+                throw new IllegalArgumentException("Ingrese un correo electrónico válido.");
+            }
+
+            // Si todo está bien, procesamos
+            usuario.setRol("ROLE_" + usuario.getRol());
+            usuarioService.crearUsuario(usuario);
+            return "redirect:/login?registroExitoso";
+
+        } 
+        // EQUIVALENTE A EXCEPT:
+        catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage()); // Pasamos el mensaje al HTML
+            model.addAttribute("usuario", usuario);     // Devolvemos los datos para no perder lo escrito
+            return "registro";
+        } 
+        catch (Exception e) {
+            model.addAttribute("error", "Error inesperado al procesar el registro.");
+            model.addAttribute("usuario", usuario);
+            return "registro";
         }
-        usuario.setRol("ROLE_" + usuario.getRol());
-        usuarioService.crearUsuario(usuario);
-        return "redirect:/login?registroExitoso";
     }
+
+    // --- EL RESTO DE TUS MÉTODOS SE MANTIENEN IGUAL ---
 
     @GetMapping("/usuarios")
     public String listarUsuarios(@RequestParam(required = false) String nombre, Model model) {
@@ -97,7 +131,6 @@ public class UsuarioController {
     @GetMapping({"/perfil", "/voluntario/perfil", "/fundacion/perfil"})
     public String perfil(Model model, Authentication auth) {
         Usuario usuario = obtenerUsuarioLogueado(auth);
-
         Set<String> roles = AuthorityUtils.authorityListToSet(auth.getAuthorities());
         String rolActual = roles.contains("ROLE_ADMIN") ? "ADMIN" :
                            roles.contains("ROLE_FUNDACION") ? "FUNDACION" : "VOLUNTARIO";
@@ -110,15 +143,11 @@ public class UsuarioController {
     @PostMapping({"/perfil/guardar", "/voluntario/perfil/guardar", "/fundacion/perfil/guardar"})
     public String guardarPerfil(@ModelAttribute("usuario") Usuario form, Authentication auth) {
         Usuario actual = obtenerUsuarioLogueado(auth);
-
-        // Actualizamos campos permitidos
         actual.setTelefonoUsuario(form.getTelefonoUsuario());
         if (form.getPassword() != null && !form.getPassword().trim().isEmpty()) {
             actual.setPassword(usuarioService.encriptarPassword(form.getPassword()));
         }
-
         usuarioService.actualizarDatosPerfil(actual);
-
         Set<String> roles = AuthorityUtils.authorityListToSet(auth.getAuthorities());
         if (roles.contains("ROLE_ADMIN")) return "redirect:/usuarios?perfilActualizado";
         if (roles.contains("ROLE_FUNDACION")) return "redirect:/fundacion/dashboard?perfilActualizado";

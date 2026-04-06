@@ -1,0 +1,3 @@
+-- Reinicia la tabla y mete al Admin con los nombres de columna de tu @Entity
+INSERT INTO usuario (id, userName, password, rol, correo_usuario, telefono_usuario, tipo_documento, numero_documento, estado_usuario, create_at, sector) 
+VALUES (1, 'Administrador SAPIB', '$2a$10$XLo r38NYyZ7/99ktfvu6U.gcEozBEbALIFu9ljr7uz2eekevnyb6q', 'ROLE_ADMIN', 'admin@sapib.com', '3100000000', 'CC', '99999999', 1, NOW(), 'Soporte');
